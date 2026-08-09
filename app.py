@@ -42,7 +42,7 @@ if st.button("🚀 Obradi cijeli tiket", type="primary"):
         with st.spinner(f"Hashim analizira {len(parovi_lista)} parova i vrši Monte Carlo simulacije..."):
             time.sleep(1.5)
             
-        st.success(uspješno obrađeno parova: {len(parovi_lista)}!)
+        st.success(f"Uspješno obrađeno parova: {len(parovi_lista)}!")
         st.divider()
         st.markdown("### 📊 Rezultati simulacije za tvoj tiket:")
         
