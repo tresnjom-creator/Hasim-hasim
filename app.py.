@@ -2,12 +2,14 @@ import streamlit as st
 import random
 import time
 
-# Podešavanje izgleda da u potpunosti oponaša chat interfejs
+# CSS koji u potpunosti sakriva Streamlitovu bočnu traku (sidebar), menije i zaglavlja
 st.markdown("""
     <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    [data-testid="stSidebar"] {display: none !important;}
+    [data-testid="collapsedControl"] {display: none !important;}
+    #MainMenu {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
+    header {visibility: hidden !important;}
     .stApp {
         background-color: #131314;
         color: #e3e3e3;
@@ -29,7 +31,7 @@ st.caption("Tvoj lični AI sportski analitičar.")
 # Inicijalizacija chata
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "Zdravo Merzuhe! Ja sam Hashim. Pošalji mi parove koje želiš da analiziramo (možeš ubaciti i više njih odjednom, svaki u novi red), izaberi sport i pokrenut ću simulaciju."}
+        {"role": "assistant", "content": "Zdravo Merzuhe! Ja sam Hashim. Pošalji mi parove koje želiš da analiziramo (možeš ubaciti i više njih odjednom, svaki u novi red), izaberi sport ispod i pokrenut ću simulaciju."}
     ]
 
 # Prikaz istorije poruka u oblačićima
@@ -37,8 +39,8 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Odabir sporta
-sport_izbor = st.radio("Izaberi sport:", ["Fudbal ⚽", "Košarka 🏀"], horizontal=True)
+# Odabir sporta (sada preko običnih radio dugmadi direktno u chatu, bez bočne trake)
+sport_izbor = st.radio("Izaberi sport:", ["Fudbal ⚽", "Košarka 🏀"], horizontal=True, label_visibility="collapsed")
 
 # Donje polje za unos poruke (podržava više redova za više parova odjednom)
 if prompt := st.chat_input("Unesi parove (npr. Real - Barca, Inter - Milan)..."):
@@ -73,4 +75,3 @@ if prompt := st.chat_input("Unesi parove (npr. Real - Barca, Inter - Milan)...")
         
         st.markdown(odgovor)
         st.session_state.messages.append({"role": "assistant", "content": odgovor})
-
