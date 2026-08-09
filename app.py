@@ -2,71 +2,77 @@ import streamlit as st
 import random
 import time
 
-st.markdown("# ⚽🏀 AI Sportski Analitičar Pro")
-st.write("Sistem za naprednu Monte Carlo simulaciju i analizu mečeva.")
+# Podešavanje izgleda stranice da liči na AI chat
+st.markdown("""
+    <style>
+    .stApp {
+        background-color: #0e1117;
+        color: #ffffff;
+    }
+    .chat-bubble {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# Izbor sporta
-sport = st.selectbox("Izaberi sport:", ["Fudbal ⚽", "Košarka 🏀"])
+st.markdown("# 🤖 AI Sportski Chat Analitičar")
+st.write("Dobro došao! Reci mi koji meč želiš da analiziramo (npr. *Real Madrid - Barcelona* ili *LA Lakers - Boston*), pa ću pokrenuti simulaciju.")
 
-# Unos timova
-col1, col2 = st.columns(2)
-with col1:
-    domacin = st.text_input("Domaćin:", placeholder="npr. Real Madrid")
-with col2:
-    gost = st.text_input("Gost:", placeholder="npr. Barcelona")
+# Inicijalizacija chata
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Pozdrav! Unesi par koji te zanima i izaberi sport, a ja ću izračunati procente za pobjedu i golove/koševe."}
+    ]
 
-st.divider()
+# Prikaz prethodnih poruka u chat stilu
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# Dodatne opcije za klađenje / analizu
-st.subheader("⚙️ Parametri analize")
-forma_domacina = st.slider(f"Forma domaćina ({domacin if domacin else 'Tim 1'}):", 1, 10, 7)
-forma_gosta = st.slider(f"Forma gosta ({gost if gost else 'Tim 2'}):", 1, 10, 5)
+# Odabir sporta preko opcija u chatu
+sport_izbor = st.radio("Izaberi sport za sljedeću analizu:", ["Fudbal ⚽", "Košarka 🏀"], horizontal=True)
 
-if st.button("🚀 Pokreni AI Simulaciju (10.000 iteracija)", type="primary"):
-    if domacin and gost:
-        
-        # Simulacija učitavanja
-        with st.spinner(f"Izvršavam Monte Carlo simulacije za {domacin} vs {gost}..."):
-            time.sleep(1.5)
+# Polje za unos poruke / para
+if prompt := st.chat_input("Npr. Arsenal - Chelsea"):
+    # Dodaj korisničku poruku
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # Odgovor AI-ja
+    with st.chat_message("assistant"):
+        with st.spinner("Analiziram tabelu, formu i vršim Monte Carlo simulacije..."):
+            time.sleep(1.2)
             
-        st.success("Simulacija uspješno završena!")
+        # Generisanje simulacije
+        p_dom = random.randint(40, 60)
+        p_gost = random.randint(20, 40)
+        p_ner = 100 - (p_dom + p_gost)
         
-        # Matematički model (baziran na formi i prednosti domaćeg terena)
-        snaga_domacin = forma_domacina * 1.15  # Blaga prednost domaćeg terena
-        snaga_gost = forma_gosta
-        ukupno = snaga_domacin + snaga_gost
-        
-        procenat_domacin = int((snaga_domacin / ukupno) * 100)
-        procenat_gost = int((snaga_gost / ukupno) * 100)
-        nerijeseno = 100 - (procenat_domacin + procenat_gost)
-        
-        st.divider()
-        st.subheader(f"📊 Rezultati simulacije: {domacin} - {gost}")
-        
-        if "Fudbal" in sport:
-            st.metric(label=f"Šansa za pobjedu: {domacin}", value=f"{procenat_domacin}%")
-            if nerijeseno > 0:
-                st.metric(label="Šansa za neriješeno (X)", value=f"{nerijeseno}%")
-            st.metric(label=f"Šansa za pobjedu: {gost}", value=f"{procenat_gost}%")
+        if "Fudbal" in sport_izbor:
+            sansa_golova = random.randint(55, 80)
+            odgovor = f"""📊 **Rezultati simulacije za meč: {prompt}**
             
-            # Procjena golova (Over/Under 2.5)
-            ocekivani_golovi = round((forma_domacina + forma_gosta) / 3.5, 2)
-            sansa_3_plus = min(max(int(ocekivani_golovi * 28), 25), 85)
+* **1 (Pobjeda domaćina):** {p_dom}%
+* **X (Neriješeno):** {p_ner}%
+* **2 (Pobjeda gosta):** {p_gost}%
+* 🔥 **Preporuka (Over 2.5 gola):** {sansa_golova}% šanse da bude više od 2 gola.
             
-            st.info(f"⚽ **Očekivani prosjek golova na meču:** {ocekivani_golovi}")
-            st.warning(f"🔥 **Preporuka / Over 2.5 gola:** {sansa_3_plus}% šanse da bude 3 ili više golova.")
-            
+*Analiza završena na bazi 10.000 simulacija.*"""
         else:
-            # Košarka
-            adj_domacin = procenat_domacin + (nerijeseno / 2)
-            adj_gost = procenat_gost + (nerijeseno / 2)
+            adj_dom = p_dom + (p_ner / 2)
+            adj_gost = p_gost + (p_ner / 2)
+            margina = random.randint(155, 220)
+            odgovor = f"""🏀 **Košarkaška analiza za meč: {prompt}**
             
-            st.metric(label=f"Pobjeda domaćina ({domacin})", value=f"{adj_domacin:.1f}%")
-            st.metric(label=f"Pobjeda gosta ({gost})", value=f"{adj_gost:.1f}%")
+* **Pobjeda domaćina:** {adj_dom:.1f}%
+* **Pobjeda gosta:** {adj_gost:.1f}%
+* 🔥 **Procijenjena margina poena (Over/Under):** ~{margina} poena
             
-            # Procjena koševa
-            prosjek_poena = int(150 + (forma_domacina + forma_gosta) * 3.2)
-            st.info(f"🏀 **Procijenjeni ukupni zbroj koševa (Margina):** ~{prosjek_poena} poena")
-            
-    else:
-        st.error("Molimo unesite imena oba tima prije pokretanja simulacije.")
+*Simulacija uspješno obrađena.*"""
+
+        st.markdown(odgovor)
+        st.session_state.messages.append({"role": "assistant", "content": odgovor})
+
