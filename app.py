@@ -1,69 +1,167 @@
-import streamlit as st
-import random
-import time
-
-st.markdown("""
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hashim</title>
     <style>
-    .stApp {
-        background-color: #131314;
-        color: #e3e3e3;
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    .stTextArea textarea {
-        background-color: #1e1f20 !important;
-        color: #e3e3e3 !important;
-        border-radius: 12px !important;
-        border: 1px solid #333538 !important;
-    }
+        body {
+            background-color: #131314;
+            color: #e3e3e3;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        .header {
+            border-bottom: 1px solid #333538;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+        h2 { margin: 0; color: #ffffff; font-size: 22px; }
+        p { color: #8e918f; font-size: 13px; margin: 5px 0 0 0; }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-bottom: 20px;
+        }
+        .message {
+            background-color: #1e1f20;
+            border: 1px solid #333538;
+            border-radius: 16px;
+            padding: 14px;
+            max-width: 90%;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        .user-message {
+            background-color: #004a77;
+            align-self: flex-end;
+            border: none;
+        }
+        .input-area {
+            border-top: 1px solid #333538;
+            padding-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        textarea {
+            width: 100%;
+            height: 70px;
+            background-color: #1e1f20;
+            color: #e3e3e3;
+            border: 1px solid #333538;
+            border-radius: 12px;
+            padding: 12px;
+            box-sizing: border-box;
+            font-size: 14px;
+            resize: none;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sports {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #c4c7c5;
+        }
+        button {
+            background-color: #a8c7fa;
+            color: #001d35;
+            border: none;
+            padding: 10px 22px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #d3e3fd; }
     </style>
-""", unsafe_allow_html=True)
+</head>
+<body>
 
-st.markdown("## 🧠 Hashim")
-st.caption("Tvoj lični AI sportski analitičar.")
+<div class="header">
+    <h2>🧠 Hashim</h2>
+    <p>Tvoj lični AI sportski analitičar.</p>
+</div>
 
-st.markdown("Zdravo! Unesi parove za svoj tiket u polje ispod (svaki u novi red) i klikni dugme za analizu.")
+<div class="chat-container" id="chatContainer">
+    <div class="message">
+        Zdravo Merzuhe! Ja sam Hashim. Ubaci parove koje želiš da analiziramo (možeš i 10 parova odjednom, svaki u novi red), izaberi sport i posalji mi poruku!
+    </div>
+</div>
 
-sport_izbor = st.radio("Izaberi sport:", ["Fudbal ⚽", "Košarka 🏀"], horizontal=True)
+<div class="input-area">
+    <div class="sports">
+        <label><input type="radio" name="sport" value="fudbal" checked> Fudbal ⚽</label>
+        <label><input type="radio" name="sport" value="kosarka"> Košarka 🏀</label>
+    </div>
+    <textarea id="userInput" placeholder="Unesi parove (svaki u novi red)..."></textarea>
+    <div class="controls">
+        <span></span>
+        <button onclick="posaljiPoruku()">Pošalji</button>
+    </div>
+</div>
 
-parovi_input = st.text_area(
-    "Unesi parove (svaki u novi red):", 
-    placeholder="Real Madrid - Barcelona\nManchester City - Arsenal\nInter - Milan",
-    height=150
-)
-
-if st.button("🚀 Pokreni analizu tiketa", type="primary"):
-    if parovi_input.strip():
-        parovi_lista = [p.strip() for p in parovi_input.split("\n") if p.strip()]
+<script>
+function posaljiPoruku() {
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    if (!text) return;
+    
+    const chat = document.getElementById('chatContainer');
+    
+    // Korisnikova poruka
+    const userMsg = document.createElement('div');
+    userMsg.className = 'message user-message';
+    userMsg.innerText = text;
+    chat.appendChild(userMsg);
+    
+    input.value = '';
+    chat.scrollTop = chat.scrollHeight;
+    
+    // Hashimov odgovor
+    setTimeout(() => {
+        const sport = document.querySelector('input[name="sport"]:checked').value;
+        const parovi = text.split('\n').filter(p => p.trim() !== '');
         
-        with st.spinner(f"Hashim analizira {len(parovi_lista)} parova..."):
-            time.sleep(1)
+        let odgovor = "Evo rezultata simulacije za tvoj tiket:<br><br>";
+        parovi.forEach((par, index) => {
+            const pDom = Math.floor(Math.random() * 18) + 42;
+            const pGost = Math.floor(Math.random() * 18) + 20;
+            const pNer = 100 - (pDom - pGost);
             
-        st.success(f"Uspješno obrađeno parova: {len(parovi_lista)}")
-        st.divider()
-        st.markdown("### 📊 Rezultati simulacije:")
+            if (sport === 'fudbal') {
+                const golovi = Math.floor(Math.random() * 25) + 62;
+                odgovor += `<b>${index + 1}. ${par}</b><br>• 1: ${pDom}% | X: ${pNer}% | 2: ${pGost}%<br>• 🔥 Over 2.5: <b>${golovi}%</b><br><br>`;
+            } else {
+                const adjDom = (pDom + pNer / 2).toFixed(1);
+                const adjGost = (pGost + pNer / 2).toFixed(1);
+                const margina = Math.floor(Math.random() * 68) + 154;
+                odgovor += `<b>${index + 1}. ${par}</b><br>• Pobjeda domaćina: ${adjDom}%<br>• Pobjeda gosta: ${adjGost}%<br>• 🔥 Margina koševa: <b>~${margina}</b><br><br>`;
+            }
+        });
         
-        for i, par in enumerate(parovi_lista, 1):
-            p_dom = random.randint(43, 59)
-            p_gost = random.randint(21, 37)
-            p_ner = 100 - (p_dom + p_gost)
-            
-            if "Fudbal" in sport_izbor:
-                sansa_golova = random.randint(62, 86)
-                st.markdown(f"""
-                **{i}. {par}**
-                * 1: {p_dom}% | X: {p_ner}% | 2: {p_gost}%
-                * 🔥 Over 2.5 gola: **{sansa_golova}%**
-                """)
-            else:
-                adj_dom = p_dom + (p_ner / 2)
-                adj_gost = p_gost + (p_ner / 2)
-                margina = random.randint(154, 220)
-                st.markdown(f"""
-                **{i}. {par}**
-                * Pobjeda domaćina: {adj_dom:.1f}% | Pobjeda gosta: {adj_gost:.1f}%
-                * 🔥 Margina koševa: **~{margina}**
-                """)
-            st.write("---")
-    else:
-        st.warning("Molimo te da uneseš barem jedan par.")
+        const botMsg = document.createElement('div');
+        botMsg.className = 'message';
+        botMsg.innerHTML = odgovor;
+        chat.appendChild(botMsg);
+        chat.scrollTop = chat.scrollHeight;
+    }, 800);
+}
+</script>
+
+</body>
+</html>
 
