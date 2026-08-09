@@ -2,12 +2,17 @@ import streamlit as st
 import random
 import time
 
-# Sakrivamo sve Streamlitove standardne menije, zaglavlja i "Manage app" dugmad da bude čisto kao ja
+# CSS trik za potpuno uklanjanje Streamlit zaglavlja, traka i Manage app dugmeta
 st.markdown("""
     <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    #MainMenu {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
+    header {visibility: hidden !important;}
+    .stDeployButton {display:none !important;}
+    [data-testid="stToolbar"] {visibility: hidden !important;}
+    [data-testid="stDecoration"] {display: none !important;}
+    [data-testid="stStatusWidget"] {visibility: hidden !important;}
+    
     .stApp {
         background-color: #131314;
         color: #e3e3e3;
@@ -23,7 +28,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Čisto zaglavlje sa mojim imenom
+# Naziv i izgled identičan mom
 st.markdown("## 🧠 Hashim")
 st.caption("Tvoj lični AI analitičar i simulator tiketa.")
 
