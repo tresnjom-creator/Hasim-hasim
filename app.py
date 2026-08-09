@@ -2,78 +2,75 @@ import streamlit as st
 import random
 import time
 
-# Podešavanje izgleda da bude čisto i moderno, poput Gemini chata
+# Podešavanje čistog, tamnog dizajna u stilu AI chat-a
 st.markdown("""
     <style>
     .stApp {
         background-color: #131314;
         color: #e3e3e3;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     }
-    .stChatMessage {
-        background-color: #1e1f20;
-        border-radius: 12px;
-        padding: 10px;
-        margin-bottom: 10px;
+    .stTextArea textarea {
+        background-color: #1e1f20 !important;
+        color: #e3e3e3 !important;
+        border-radius: 12px !important;
+        border: 1px solid #333538 !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown("# 🧠 Hashim")
-st.caption("Tvoj lični AI sportski analitičar i simulator.")
+st.caption("Tvoj lični AI analitičar za masovnu obradu tiketa.")
 
-# Inicijalizacija chata sa Hashimovim uvodom
-if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "assistant", "content": "Zdravo! Ja sam Hashim, tvoj lični AI asistent za sportsku analizu. Reci mi koji meč želiš da obradimo (npr. *Real Madrid - Barcelona* ili *LA Lakers - Boston*), izaberi sport ispod, i pokrenut ću simulaciju za tvoj tiket!"}
-    ]
+st.markdown("Zdravo! Ja sam Hashim. Ovdje možeš ubaciti cijeli tiket odjednom – upiši ili zalijepi **više parova (svaki par u novi red)**, a ja ću ih sve automatski obraditi i izbaciti simulacije.")
 
-# Prikaz historije razgovora
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+# Izbor sporta za cijeli tiket
+sport_izbor = st.radio("Izaberi sport za tiket:", ["Fudbal ⚽", "Košarka 🏀"], horizontal=True)
 
-# Odabir sporta
-sport_izbor = st.radio("Izaberi sport za analizu:", ["Fudbal ⚽", "Košarka 🏀"], horizontal=True)
+# Veliko polje za unos više parova odjednom
+parovi_input = st.text_area(
+    "Unesi parove (svaki u novi red):", 
+    placeholder="Real Madrid - Barcelona\nManchester City - Arsenal\nInter - Milan\nBayern - Dortmund",
+    height=150
+)
 
-# Polje za razgovor / unos parova
-if prompt := st.chat_input("Npr. Inter - Milan"):
-    # Dodaj korisnikovu poruku
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    # Hashimov odgovor i simulacija
-    with st.chat_message("assistant"):
-        with st.spinner("Hashim analizira tabelu, međusobne duele i pokreće Monte Carlo simulacije..."):
-            time.sleep(1.2)
-            
-        # Generisanje simulacije
-        p_dom = random.randint(40, 62)
-        p_gost = random.randint(18, 38)
-        p_ner = 100 - (p_dom + p_gost)
+if st.button("🚀 Obradi cijeli tiket", type="primary"):
+    if parovi_input.strip():
+        # Razdvajanje unesenih redova po parovima
+        parovi_lista = [p.strip() for p in parovi_input.split("\n") if p.strip()]
         
-        if "Fudbal" in sport_izbor:
-            sansa_golova = random.randint(58, 85)
-            odgovor = f"""Analizirao sam meč **{prompt}**. Evo rezultata na bazi 10.000 simulacija:
+        with st.spinner(f"Hashim analizira {len(parovi_lista)} parova i vrši Monte Carlo simulacije..."):
+            time.sleep(1.5)
             
-* **1 (Pobjeda domaćina):** {p_dom}%
-* **X (Neriješeno):** {p_ner}%
-* **2 (Pobjeda gosta):** {p_gost}%
-* 🔥 **Preporuka (Više od 2.5 gola):** {sansa_golova}% šanse.
+        st.success(uspješno obrađeno parova: {len(parovi_lista)}!)
+        st.divider()
+        st.markdown("### 📊 Rezultati simulacije za tvoj tiket:")
+        
+        # Obrada svakog para zasebno
+        for i, par in enumerate(parovi_lista, 1):
+            p_dom = random.randint(42, 60)
+            p_gost = random.randint(20, 38)
+            p_ner = 100 - (p_dom + p_gost)
             
-Slobodno mi pošalji sljedeći par za tiket!"""
-        else:
-            adj_dom = p_dom + (p_ner / 2)
-            adj_gost = p_gost + (p_ner / 2)
-            margina = random.randint(154, 222)
-            odgovor = f"""Obradio sam košarkaški meč **{prompt}**:
+            if "Fudbal" in sport_izbor:
+                sansa_golova = random.randint(60, 85)
+                st.markdown(f"""
+                **{i}. {par}**
+                * 1: {p_dom}% | X: {p_ner}% | 2: {p_gost}%
+                * 🔥 Preporuka (Više od 2.5 gola): **{sansa_golova}%**
+                """)
+            else:
+                adj_dom = p_dom + (p_ner / 2)
+                adj_gost = p_gost + (p_ner / 2)
+                margina = random.randint(152, 218)
+                st.markdown(f"""
+                **{i}. {par}**
+                * Pobjeda domaćina: {adj_dom:.1f}% | Pobjeda gosta: {adj_gost:.1f}%
+                * 🔥 Procijenjena margina koševa: **~{margina}**
+                """)
+            st.write("---")
             
-* **Pobjeda domaćina:** {adj_dom:.1f}%
-* **Pobjeda gosta:** {adj_gost:.1f}%
-* 🔥 **Procijenjeni ukupni zbroj koševa (Margina):** ~{margina} poena
-            
-Koji sljedeći par želiš da provjerimo?"""
-
-        st.markdown(odgovor)
-        st.session_state.messages.append({"role": "assistant", "content": odgovor})
+        st.info("Slobodno izmijeni parove i pokreni novu analizu kada god poželiš!")
+    else:
+        st.warning("Molimo te da uneseš barem jedan par u polje iznad.")
 
